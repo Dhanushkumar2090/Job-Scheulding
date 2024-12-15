@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JOB SCHEDULING</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 80%;
+      margin: 20px auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    #input-section {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 7px;
+    }
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 9px;
+    }
+    button {
+      padding: 10px 16px;
+      background-color: #2f96eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2f42f0;
+    }
+    #output-section {
+      border: 1px solid #2f95e9;
+      padding: 20px;
+      margin-top: 10px;
+    }
+    h1, h4 {
+      color: #2f93f0;
+    }
+  </style>
+</head>
+<body bgcolor="black" text="white">
+  <div class="container">
+    <h1>JOB SCHEDULING SYSTEM</h1>
+    <hr>
+    <div id="input-section">
+      <label for="jobPriority">Job Priority:</label>
+      <input type="number" placeholder="Enter Priority" id="jobPriority">
+      <label for="jobExecutionTime">Job Execution Time:</label>
+      <input type="number" placeholder="Enter Execution Time" id="jobExecutionTime">
+      <button onclick="addJob()">Add Job</button>
+
+      <label for="schedulingAlgorithm">Choose Scheduling Algorithm:</label>
+      <select id="schedulingAlgorithm">
+        <option value="roundRobin">Round Robin</option>
+        <option value="sjf">Shortest Job First (SJF)</option>
+        <option value="priority">Priority Scheduling</option>
+      </select>
+      <button onclick="scheduleJobs()">Schedule Jobs</button>
+      <hr>
+    </div>
+    <h4>Output:</h4>
+    <div id="output-section"></div>
+  </div>
+
+  <script>
+    let jobs = [];
+
+    function addJob() {
+      const jobPriority = parseInt(document.getElementById('jobPriority').value);
+      const jobExecutionTime = parseInt(document.getElementById('jobExecutionTime').value);
+      if (isNaN(jobPriority) || isNaN(jobExecutionTime) || jobPriority <= 0 || jobExecutionTime <= 0) {
+        alert('Please enter valid positive numbers for priority and execution time.');
+        return;
+      }
+      jobs.push({ priority: jobPriority, executionTime: jobExecutionTime });
+      alert(`Job added with Priority: ${jobPriority} and Execution Time: ${jobExecutionTime}`);
+      document.getElementById('jobPriority').value = '';
+      document.getElementById('jobExecutionTime').value = '';
+    }
+
+    function scheduleJobs() {
+      const schedulingAlgorithm = document.getElementById('schedulingAlgorithm').value;
+      let output = '';
+
+      switch (schedulingAlgorithm) {
+        case 'roundRobin':
+          output = roundRobinScheduling();
+          break;
+        case 'sjf':
+          output = sjfScheduling();
+          break;
+        case 'priority':
+          output = priorityScheduling();
+          break;
+        default:
+          output = 'Invalid scheduling algorithm.';
+      }
+
+      document.getElementById('output-section').innerHTML = output;
+    }
+
+    function roundRobinScheduling() {
+      const quantum = 3; // Quantum time for Round Robin
+      let output = 'Round Robin Scheduling:<br>';
+      let currentTime = 0;
+
+      while (jobs.length > 0) {
+        const currentJob = jobs.shift();
+        const timeExecuted = Math.min(currentJob.executionTime, quantum);
+        output += `Time ${currentTime}: Job with Priority '${currentJob.priority}' executed for ${timeExecuted} units.<br>`;
+        currentTime += timeExecuted;
+        currentJob.executionTime -= timeExecuted;
+        if (currentJob.executionTime > 0) {
+          jobs.push(currentJob); // Requeue job if not completed
+        }
+      }
+
+      return output;
+    }
+
+    function sjfScheduling() {
+      jobs.sort((a, b) => a.executionTime - b.executionTime); // Sort by execution time
+      let output = 'Shortest Job First (SJF) Scheduling:<br>';
+      let currentTime = 0;
+
+      while (jobs.length > 0) {
+        const currentJob = jobs.shift();
+        output += `Time ${currentTime}: Job with Priority '${currentJob.priority}' executed for ${currentJob.executionTime} units.<br>`;
+        currentTime += currentJob.executionTime;
+      }
+
+      return output;
+    }
+
+    function priorityScheduling() {
+      jobs.sort((a, b) => b.priority - a.priority); // Sort by priority (higher priority first)
+      let output = 'Priority Scheduling:<br>';
+      let currentTime = 0;
+
+      while (jobs.length > 0) {
+        const currentJob = jobs.shift();
+        output += `Time ${currentTime}: Job with Priority '${currentJob.priority}' executed for ${currentJob.executionTime} units.<br>`;
+        currentTime += currentJob.executionTime;
+      }
+
+      return output;
+    }
+  </script>
+</body>
+</html>
